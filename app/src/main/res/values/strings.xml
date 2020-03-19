@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">group_no_5</string>
+    <string name="Question">Are you sick?</string>
+    <string name="Yes">Yes</string>
+    <string name="No">No</string>
+    <string name="Positive">You are sick</string>
+    <string name="Negative">You are healthy!</string>
+</resources>
