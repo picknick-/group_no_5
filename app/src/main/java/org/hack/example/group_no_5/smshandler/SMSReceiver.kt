@@ -3,10 +3,11 @@ package org.hack.example.group_no_5.smshandler
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.provider.Settings.Global.getString
 import android.provider.Telephony
 import android.telephony.SmsManager
-import org.hack.example.group_no_5.R
+import org.hack.example.group_no_5.databases.QuestionDatabase
+import org.hack.example.group_no_5.entities.QuestionWithAnswers
+import java.util.*
 
 const val MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1
 
@@ -14,8 +15,6 @@ class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent) {
         val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         smsMessages.forEach {
-            val phoneNumber: String = it.displayOriginatingAddress
-
             val message: String = it.displayMessageBody
             val result = getResult(message, context)
             if (result != null) {
@@ -25,15 +24,18 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun getResult(message: String, context: Context?): String? {
-        if (message.equals("Yes")) {
-            return context?.getString(R.string.Positive)
-        }
-        if (message.equals("No")) {
-            return context?.getString(R.string.Negative)
-        }
-        return "Please try again"
+        val questionDatabase = context?.let { QuestionDatabase.getDatabase(it) }
+        return questionDatabase?.questionDao()?.getDefault()?.let { formatQuestion(it) }
     }
 
+    private fun formatQuestion(question: QuestionWithAnswers): String {
+        val result = StringJoiner(" | ")
+        result.add(question.question.Question)
+        question.answers.forEach {
+            result.add(it.answerText)
+        }
+        return result.toString()
+    }
 
 //Sends an SMS message to another device
 

@@ -1,19 +1,16 @@
 package org.hack.example.group_no_5
 
 import android.Manifest
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.provider.Telephony
-import android.telephony.SmsManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import org.hack.example.group_no_5.smshandler.SmsReceiver
+import org.hack.example.group_no_5.databases.QuestionDatabase
+import org.hack.example.group_no_5.entities.Answer
+import org.hack.example.group_no_5.entities.AnswerWithNextQuestion
+import org.hack.example.group_no_5.entities.Question
+import org.hack.example.group_no_5.entities.QuestionWithAnswers
 
 
 const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
@@ -33,8 +30,11 @@ class MainActivity : AppCompatActivity() {
         )
 
 
+        prepareQuestions();
+
         setContentView(R.layout.activity_main)
     }
+
 
     fun acceptAnswer(view: View) {
         val intent = Intent(this, Result::class.java).apply {
@@ -48,6 +48,19 @@ class MainActivity : AppCompatActivity() {
             putExtra(EXTRA_MESSAGE, getString(R.string.Negative))
         }
         startActivity(intent)
+    }
+
+    private fun prepareQuestions() {
+        var qDatabase= QuestionDatabase.getDatabase(this.applicationContext)
+        var defaultQuestion = Question(1,"Are you sick?")
+        var yesQuestion = Question(2, "You are sick",defaultQuestion.Qid)
+        var noQuestion = Question(3, "You are not sick",defaultQuestion.Qid)
+        var answerYes = Answer(1, "Yes", defaultQuestion.Qid)
+        var answerNo = Answer(2, "No", defaultQuestion.Qid)
+//        var qwa1 = QuestionWithAnswers(defaultQuestion, listOf(answerYes, answerNo))
+//        qDatabase.questionDao().insertAll(qwa1)
+        qDatabase.questionDao().insertAll(defaultQuestion,yesQuestion,noQuestion)
+        qDatabase.questionDao().insertAll(answerYes,answerNo)
     }
 
 }
