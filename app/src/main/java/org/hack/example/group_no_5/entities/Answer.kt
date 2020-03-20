@@ -4,16 +4,17 @@ import androidx.room.*
 
 @Entity
 data class Answer(
-    @PrimaryKey(autoGenerate = true) val uid: Int,
+    @PrimaryKey val uid: Int,
     @ColumnInfo(name = "answerText") val answerText: String?,
-    val questionId: Long
+    val questionId: Long,
+    val nextQuestion: Long
 )
 
 data class AnswerWithNextQuestion(
     @Embedded val answer: Answer,
     @Relation(
-        parentColumn = "uid",
-        entityColumn = "previousQuestion"
+        parentColumn = "nextQuestion",
+        entityColumn = "Qid"
     )
     val nextQuestion: Question
 )

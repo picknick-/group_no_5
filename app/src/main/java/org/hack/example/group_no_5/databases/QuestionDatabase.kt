@@ -5,13 +5,16 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import org.hack.example.group_no_5.dao.QuestionDAO
+import org.hack.example.group_no_5.dao.UserDao
 import org.hack.example.group_no_5.entities.Answer
 import org.hack.example.group_no_5.entities.Question
+import org.hack.example.group_no_5.entities.User
 
-@Database(entities = arrayOf(Question::class, Answer::class), version = 1, exportSchema = false)
+@Database(entities = arrayOf(Question::class, Answer::class, User::class), version = 1, exportSchema = false)
 abstract class QuestionDatabase : RoomDatabase() {
 
     abstract fun questionDao(): QuestionDAO
+    abstract fun userDao(): UserDao
 
     companion object {
         // Singleton prevents multiple instances of database opening at the
