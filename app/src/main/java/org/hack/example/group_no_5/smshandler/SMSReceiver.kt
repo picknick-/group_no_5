@@ -7,6 +7,7 @@ import android.provider.Telephony
 import android.telephony.SmsManager
 import android.telephony.SmsMessage
 import org.hack.example.group_no_5.databases.QuestionDatabase
+import org.hack.example.group_no_5.defaultQuestion
 import org.hack.example.group_no_5.entities.Question
 import org.hack.example.group_no_5.entities.QuestionWithAnswers
 import org.hack.example.group_no_5.entities.User
@@ -87,7 +88,7 @@ class SmsReceiver : BroadcastReceiver() {
 
     private fun createNewUser(number: String, context: Context): UserWithCurrentQuestion? {
         val questionDatabase = QuestionDatabase.getDatabase(context)
-        val id = questionDatabase.questionDao().getDefault().question.qid
+        val id = defaultQuestion.qid
         var user = User(number, id)
         questionDatabase.userDao().insert(user)
         return questionDatabase.userDao().findByNumber(number)

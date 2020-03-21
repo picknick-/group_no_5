@@ -1,5 +1,6 @@
 package org.hack.example.group_no_5.dao
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.*
 import org.hack.example.group_no_5.entities.*
 
@@ -7,13 +8,14 @@ import org.hack.example.group_no_5.entities.*
 @Dao
 abstract class QuestionDAO {
 
-
     open fun insertAll(newQuestion: NewQuestion): Long {
-        newQuestion.question.qid = insert(newQuestion.question)
-        newQuestion.answers?.forEach { answer ->
-            answer.answer.questionId = newQuestion.question.qid
-            answer.answer.nextQuestion = insertAll(answer.nextQuestion)
-            insertAll(answer.answer)
+        if (newQuestion.question.qid == 0L) {
+            newQuestion.question.qid = insert(newQuestion.question)
+            newQuestion.answers?.forEach { answer ->
+                answer.answer.questionId = newQuestion.question.qid
+                answer.answer.nextQuestion = insertAll(answer.nextQuestion)
+                insertAll(answer.answer)
+            }
         }
         return newQuestion.question.qid
     }
@@ -23,9 +25,6 @@ abstract class QuestionDAO {
     @Query("SELECT * FROM question")
     abstract fun getAll(): List<QuestionWithAnswers>
 
-    @Query("SELECT * FROM question where Qid==1")
-    @Transaction
-    abstract fun getDefault(): QuestionWithAnswers
 
     @Query("SELECT * FROM question WHERE Qid ==:qId")
     @Transaction
@@ -45,4 +44,7 @@ abstract class QuestionDAO {
 
     @Delete
     abstract fun delete(answer: Answer)
+
+    @Update
+    abstract fun update(question: Question)
 }
