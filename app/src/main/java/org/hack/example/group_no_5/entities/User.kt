@@ -10,6 +10,6 @@ data class User(
 
 data class UserWithCurrentQuestion(
     @Embedded val user: User,
-    @Relation(parentColumn = "currentQuestionID", entityColumn = "Qid")
-    val currentQuestion: Question
+    @Relation(parentColumn = "currentQuestionID", entityColumn = "qid")
+    var currentQuestion: Question
 )

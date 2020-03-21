@@ -7,8 +7,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import org.hack.example.group_no_5.databases.QuestionDatabase
-import org.hack.example.group_no_5.entities.Answer
-import org.hack.example.group_no_5.entities.Question
+import org.hack.example.group_no_5.entities.*
 
 
 const val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
@@ -28,11 +27,8 @@ class MainActivity : AppCompatActivity() {
         )
 
 
-        var default =
-            QuestionDatabase.getDatabase(this.applicationContext).questionDao().getAll()
-        if (default.isEmpty()) {
-            prepareQuestions()
-        }
+
+        prepareQuestions()
 
         setContentView(R.layout.activity_main)
     }
@@ -54,15 +50,28 @@ class MainActivity : AppCompatActivity() {
 
     private fun prepareQuestions() {
         var qDatabase = QuestionDatabase.getDatabase(this.applicationContext)
-        var defaultQuestion = Question(1, "Are you sick?")
-        var yesQuestion = Question(2, "You are sick")
-        var noQuestion = Question(3, "You are not sick")
-        var answerYes = Answer(1, "Yes", defaultQuestion.Qid, yesQuestion.Qid)
-        var answerNo = Answer(2, "No", defaultQuestion.Qid, noQuestion.Qid)
-//        var qwa1 = QuestionWithAnswers(defaultQuestion, listOf(answerYes, answerNo))
-//        qDatabase.questionDao().insertAll(qwa1)
-        qDatabase.questionDao().insertAll(defaultQuestion, yesQuestion, noQuestion)
-        qDatabase.questionDao().insertAll(answerYes, answerNo)
+        qDatabase.clearAllTables()
+
+        var answersDefaultQuestion = ArrayList<NewAnswer>()
+        var defaultQuestion = NewQuestion(Question("To start test type help"), answersDefaultQuestion)
+        var answersTemperature = ArrayList<NewAnswer>()
+        answersDefaultQuestion.add(
+            NewAnswer(
+                Answer("help"),
+                NewQuestion(Question("You are sick"), answersTemperature)
+            )
+        )
+
+
+//        var yesQuestion = Question("You are sick")
+//        var noQuestion = Question("You are not sick")
+//        qDatabase.questionDao().insertAll(yesQuestion, noQuestion)
+//        var defaultQuestion = QuestionWithAnswers(
+//            Question("Are you sick?"),
+//            listOf(answerNo.answer, answerYes.answer)
+//        )
+        defaultQuestion.question.qid = 1
+        qDatabase.questionDao().insertAll(defaultQuestion)
     }
 
 }

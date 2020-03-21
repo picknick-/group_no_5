@@ -4,20 +4,24 @@ import androidx.room.*
 import org.hack.example.group_no_5.entities.*
 
 @Dao
-interface UserDao {
+abstract class UserDao {
     @Transaction
     @Query("SELECT * FROM user")
-    fun getAll(): List<UserWithCurrentQuestion>
+    abstract fun getAll(): List<UserWithCurrentQuestion>
 
     @Transaction
     @Query(
         "SELECT * FROM user WHERE telephoneNumber LIKE :telephoneNumber LIMIT 1"
     )
-    fun findByNumber(telephoneNumber: String): UserWithCurrentQuestion?
+    abstract fun findByNumber(telephoneNumber: String): UserWithCurrentQuestion?
 
     @Insert
-    fun insert(vararg user: User)
+    abstract fun insert(user: User)
 
     @Delete
-    fun delete(user: User)
+    abstract fun delete(user: User)
+
+    @Update
+    abstract fun update(user: User)
+
 }

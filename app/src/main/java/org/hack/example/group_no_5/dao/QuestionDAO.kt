@@ -1,41 +1,48 @@
 package org.hack.example.group_no_5.dao
 
 import androidx.room.*
-import org.hack.example.group_no_5.entities.Answer
-import org.hack.example.group_no_5.entities.Question
-import org.hack.example.group_no_5.entities.QuestionWithAnswers
-import org.hack.example.group_no_5.entities.User
+import org.hack.example.group_no_5.entities.*
+
 
 @Dao
-interface QuestionDAO {
+abstract class QuestionDAO {
+
+
+    open fun insertAll(newQuestion: NewQuestion): Long {
+        newQuestion.question.qid = insert(newQuestion.question)
+        newQuestion.answers?.forEach { answer ->
+            answer.answer.questionId = newQuestion.question.qid
+            answer.answer.nextQuestion = insertAll(answer.nextQuestion)
+            insertAll(answer.answer)
+        }
+        return newQuestion.question.qid
+    }
+
+
     @Transaction
     @Query("SELECT * FROM question")
-    fun getAll(): List<QuestionWithAnswers>
+    abstract fun getAll(): List<QuestionWithAnswers>
 
     @Query("SELECT * FROM question where Qid==1")
     @Transaction
-    fun getDefault(): QuestionWithAnswers
-
+    abstract fun getDefault(): QuestionWithAnswers
 
     @Query("SELECT * FROM question WHERE Qid ==:qId")
     @Transaction
-    fun loadByIds(qId: Long): QuestionWithAnswers
-
-//    @Query(
-//        "SELECT * FROM user WHERE first_name LIKE :first AND " +
-//                "last_name LIKE :last LIMIT 1"
-//    )
-//    fun findByName(first: String, last: String): Answer
+    abstract fun loadByIds(qId: Long): QuestionWithAnswers
 
     @Insert
-    fun insertAll(vararg question: Question)
+    abstract fun insertAll(vararg questions: Question)
 
     @Insert
-    fun insertAll(vararg answer: Answer)
+    abstract fun insert(question: Question): Long
 
     @Insert
-    fun insert(vararg user: User)
+    abstract fun insertAll(vararg answer: Answer)
+
+    @Insert
+    abstract fun insertAll(answer: List<Answer>)
 
     @Delete
-    fun delete(answer: Answer)
+    abstract fun delete(answer: Answer)
 }

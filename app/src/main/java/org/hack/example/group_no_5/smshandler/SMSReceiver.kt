@@ -20,43 +20,54 @@ class SmsReceiver : BroadcastReceiver() {
         context?.let {
             val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             smsMessages.forEach { message ->
-                val question = getCurrentQuestion(message, it)
-                val nextQuestion = question?.let { it1 -> getNextQuestion(message, it1, it) }
+                val user = getCurrentUser(message, it)
+                val question = user.currentQuestion
+                val nextQuestion = getNextQuestion(message, question, user.user, it)
+                user.currentQuestion = nextQuestion.question
+
                 val result = nextQuestion?.let { it1 -> formatQuestion(it1) }
                 sendSMS(message.originatingAddress, result)
             }
         }
     }
 
-    private fun getNextQuestion(
-        message: SmsMessage,
-        question: Question,
-        context: Context
-    ): QuestionWithAnswers {
-        val response = message.messageBody
-        val questionDatabase = QuestionDatabase.getDatabase(context)
-        val questionWithAnswers = questionDatabase.questionDao().loadByIds(question.Qid)
-        questionWithAnswers.answers.forEach { answer ->
-            if (answer.answerText.equals(response,true)) {
-                val nextQuestion = questionDatabase.questionDao().loadByIds(answer.nextQuestion)
-                if (nextQuestion.answers.isEmpty()){
-                    questionDatabase.run { userDao().delete(userDao().findByNumber(message.originatingAddress)!!.user) }
-                }
-                return nextQuestion
-            }
-        }
-        return questionWithAnswers
-    }
-
-    private fun getCurrentQuestion(message: SmsMessage, context: Context): Question? {
-        val phoneNumber = message.originatingAddress
+    private fun getCurrentUser(message: SmsMessage?, context: Context): UserWithCurrentQuestion {
+        val phoneNumber = message!!.originatingAddress
         val questionDatabase = QuestionDatabase.getDatabase(context)
         var user = questionDatabase.userDao().findByNumber(phoneNumber) ?: createNewUser(
             phoneNumber,
             context
         )
-        return user?.currentQuestion
+        return user!!
+    }
 
+    private fun getNextQuestion(
+        message: SmsMessage,
+        question: Question,
+        user: User,
+        context: Context
+    ): QuestionWithAnswers {
+        val response = message.messageBody
+        val questionDatabase = QuestionDatabase.getDatabase(context)
+        val questionWithAnswers = questionDatabase.questionDao().loadByIds(question.qid)
+        questionWithAnswers.answers.forEach { answer ->
+            if (answer.answerText.equals(response, true)) {
+                if (answer.nextQuestion != 0L) {
+                    val nextQuestion = questionDatabase.questionDao().loadByIds(answer.nextQuestion)
+                    user.currentQuestionID = nextQuestion.question.qid
+                    if (nextQuestion.answers.isEmpty()){
+                    questionDatabase.run { userDao().delete(user) }
+
+                    }else {
+                        questionDatabase.run { userDao().update(user) }
+                    }
+                    return nextQuestion
+
+                }
+            }
+        }
+
+        return questionWithAnswers
     }
 
 
@@ -69,9 +80,6 @@ class SmsReceiver : BroadcastReceiver() {
         return result.toString()
     }
 
-//Sends an SMS message to another device
-
-    //Sends an SMS message to another device
     private fun sendSMS(phoneNumber: String?, message: String?) {
         val sms = SmsManager.getDefault()
         sms.sendTextMessage(phoneNumber, null, message, null, null)
@@ -79,7 +87,7 @@ class SmsReceiver : BroadcastReceiver() {
 
     private fun createNewUser(number: String, context: Context): UserWithCurrentQuestion? {
         val questionDatabase = QuestionDatabase.getDatabase(context)
-        val id = questionDatabase.questionDao().getDefault().question.Qid
+        val id = questionDatabase.questionDao().getDefault().question.qid
         var user = User(number, id)
         questionDatabase.userDao().insert(user)
         return questionDatabase.userDao().findByNumber(number)
