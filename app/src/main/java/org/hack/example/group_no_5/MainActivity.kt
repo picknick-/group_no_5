@@ -83,14 +83,14 @@ class MainActivity : AppCompatActivity() {
         answersTemperature.add(
             NewAnswer(
                 Answer("over"),
-                questionContact
+                questionSymptoms
             )
         )
 
         answersTemperature.add(
             NewAnswer(
                 Answer("below"),
-                questionSymptoms
+                questionContact
             )
         )
 
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
 
         var resultNegative =
             NewQuestion(
-                Question("Stay at home and limit your time outside, contact with other people, (only essential shopping, short walks) but even then avoid socializing with people. Thank you for cooperation"),
+                Question("Stay at home and limit your time outside, contact with other people (only essential shopping, short walks) but even then avoid socializing with people."),
                 null
             )
 
